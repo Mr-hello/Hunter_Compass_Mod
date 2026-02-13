@@ -1,0 +1,6 @@
+{
+    "ui_defs": [
+        "ui/hunter_player_compass_ui.json",
+        "ui/netease_editor_template_namespace.json"
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "resource_pack_name": "vanilla",
+    "texture_data": {
+        "hunter_player_compass:hunter_player_compass": {
+            "textures": "textures/items/f-19"
+        },
+        "hunter_player_compass:hunter_player_compass_0": {
+            "textures": "textures/items/f-0"
+        },
+        "hunter_player_compass:hunter_player_compass_1": {
+            "textures": "textures/items/f-1"
+        },
+        "hunter_player_compass:hunter_player_compass_10": {
+            "textures": "textures/items/f-10"
+        },
+        "hunter_player_compass:hunter_player_compass_11": {
+            "textures": "textures/items/f-11"
+        },
+        "hunter_player_compass:hunter_player_compass_12": {
+            "textures": "textures/items/f-12"
+        },
+        "hunter_player_compass:hunter_player_compass_13": {
+            "textures": "textures/items/f-13"
+        },
+        "hunter_player_compass:hunter_player_compass_14": {
+            "textures": "textures/items/f-14"
+        },
+        "hunter_player_compass:hunter_player_compass_15": {
+            "textures": "textures/items/f-15"
+        },
+        "hunter_player_compass:hunter_player_compass_16": {
+            "textures": "textures/items/f-16"
+        },
+        "hunter_player_compass:hunter_player_compass_17": {
+            "textures": "textures/items/f-17"
+        },
+        "hunter_player_compass:hunter_player_compass_18": {
+            "textures": "textures/items/f-18"
+        },
+        "hunter_player_compass:hunter_player_compass_19": {
+            "textures": "textures/items/f-19"
+        },
+        "hunter_player_compass:hunter_player_compass_2": {
+            "textures": "textures/items/f-2"
+        },
+        "hunter_player_compass:hunter_player_compass_20": {
+            "textures": "textures/items/f-20"
+        },
+        "hunter_player_compass:hunter_player_compass_21": {
+            "textures": "textures/items/f-21"
+        },
+        "hunter_player_compass:hunter_player_compass_22": {
+            "textures": "textures/items/f-22"
+        },
+        "hunter_player_compass:hunter_player_compass_23": {
+            "textures": "textures/items/f-23"
+        },
+        "hunter_player_compass:hunter_player_compass_24": {
+            "textures": "textures/items/f-24"
+        },
+        "hunter_player_compass:hunter_player_compass_25": {
+            "textures": "textures/items/f-25"
+        },
+        "hunter_player_compass:hunter_player_compass_26": {
+            "textures": "textures/items/f-26"
+        },
+        "hunter_player_compass:hunter_player_compass_27": {
+            "textures": "textures/items/f-27"
+        },
+        "hunter_player_compass:hunter_player_compass_3": {
+            "textures": "textures/items/f-3"
+        },
+        "hunter_player_compass:hunter_player_compass_4": {
+            "textures": "textures/items/f-4"
+        },
+        "hunter_player_compass:hunter_player_compass_5": {
+            "textures": "textures/items/f-5"
+        },
+        "hunter_player_compass:hunter_player_compass_6": {
+            "textures": "textures/items/f-6"
+        },
+        "hunter_player_compass:hunter_player_compass_7": {
+            "textures": "textures/items/f-7"
+        },
+        "hunter_player_compass:hunter_player_compass_8": {
+            "textures": "textures/items/f-8"
+        },
+        "hunter_player_compass:hunter_player_compass_9": {
+            "textures": "textures/items/f-9"
+        }
+    },
+    "texture_name": "atlas.items"
+}

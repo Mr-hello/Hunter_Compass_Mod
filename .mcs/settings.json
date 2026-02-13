@@ -1,0 +1,17 @@
+{
+    "Arena.Component.Namespace": "nxgvh",
+    "FirstTabSetting": 0,
+    "ShortItemSettings": [
+        "resource_pack_Xl7hqDtX\\ui",
+        "behavior_pack_f3qJXWZT\\Presets",
+        "behavior_pack_f3qJXWZT\\Parts",
+        "behavior_pack_f3qJXWZT\\BoxData",
+        "resource_pack_Xl7hqDtX\\effects",
+        "resource_pack_Xl7hqDtX\\models",
+        "resource_pack_Xl7hqDtX\\textures"
+    ],
+    "Uluru.autoLayerDict": {
+
+    },
+    "Uluru.checkSuspectOldUI": true
+}
