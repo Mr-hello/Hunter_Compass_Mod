@@ -2,6 +2,19 @@
     "UI": {
         "customPrefabGroupExpand": [
 
-        ]
+        ],
+        "expandData": {
+            "prefab": {
+
+            },
+            "screen": {
+                "D:\\MCStudioDownload\\work\\wy3342551532@163.com\\Cpp\\AddOn\\ac7a16077c3945eb9ce9dc32b7c592f8\\resource_pack_Xl7hqDtX\\ui\\hunter_player_compass_ui.json": [
+                    "/main",
+                    "/main/menu_panel",
+                    "/main/menu_panel/messagebox_panel",
+                    "/main/menu_panel/messagebox_panel/button_panel"
+                ]
+            }
+        }
     }
 }

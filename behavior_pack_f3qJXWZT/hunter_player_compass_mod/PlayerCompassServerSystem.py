@@ -359,7 +359,31 @@ class PlayerCompassServerSystem(ServerSystem):
         print(self.prey_ids)
 
     def on_script_tick(self):
-        # print(self.hunter_ids)
+        # 1. 初始化缓存字典
+        if not hasattr(self, 'prey_last_pos_cache'):
+            self.prey_last_pos_cache = {}
+
+        # 2. 【关键修改】全局更新所有猎物的位置缓存
+        # 无论猎人是否在看他们，都要实时记录他们当前所在维度的位置
+        if self.prey_ids:
+            for pid in self.prey_ids:
+                # 获取猎物当前维度
+                p_dim_comp = serverApi.GetEngineCompFactory().CreateDimension(pid)
+                if not p_dim_comp: continue
+                p_dim = p_dim_comp.GetEntityDimensionId()
+
+                # 获取猎物当前坐标
+                p_pos_comp = compFactory.CreatePos(pid)
+                if not p_pos_comp: continue
+                p_pos = p_pos_comp.GetPos()
+
+                if p_pos:
+                    if pid not in self.prey_last_pos_cache:
+                        self.prey_last_pos_cache[pid] = {}
+                    # 记录该猎物在当前维度的最新位置
+                    self.prey_last_pos_cache[pid][p_dim] = p_pos
+
+        # 3. 处理非猎人玩家 UI
         player_ui_data = self.CreateEventData()
         player_id_list = serverApi.GetPlayerList()
         for player_id in player_id_list:
@@ -367,12 +391,12 @@ class PlayerCompassServerSystem(ServerSystem):
                 player_ui_data['id'] = player_id
                 player_ui_data['direction'] = -1
                 self.NotifyToClient(player_id, 'ChangeCompassTexture', player_ui_data)
+
+        # 4. 猎人追踪逻辑
         if len(self.prey_ids) != 0 and len(self.hunter_ids) != 0:
             portion = 360 / 28.0
             start_angle = -180 + portion / 2
             end_angle = 180 - portion / 2
-            hp_x_pos = 1.0
-            hp_z_pos = 1.0
 
             for hunter_id, value in self.hunter_ids.items():
                 pos_comp = compFactory.CreatePos(hunter_id)
@@ -382,22 +406,40 @@ class PlayerCompassServerSystem(ServerSystem):
 
                 if 0 < value["target"] <= len(self.prey_ids):
                     prey_id = self.prey_ids[value["target"] - 1]
+
+                    # 获取猎物当前的真实维度（用于判断是否跨维度）
                     prey_dimension_comp = serverApi.GetEngineCompFactory().CreateDimension(prey_id)
-                    prey_dimension = prey_dimension_comp.GetEntityDimensionId()
+                    prey_real_dimension = prey_dimension_comp.GetEntityDimensionId()
 
-                    if hunter_dimension == prey_dimension:
+                    # === 决定目标坐标 ===
+                    target_pos = None
+                    is_tracking_last_known = False
 
+                    if hunter_dimension == prey_real_dimension:
+                        # 情况A: 同维度，直接获取实时坐标
                         prey_pos_comp = compFactory.CreatePos(prey_id)
-                        self.prey_pos = prey_pos_comp.GetPos()
+                        target_pos = prey_pos_comp.GetPos()
+                    else:
+                        # 情况B: 不同维度，从全局缓存中查找猎物在猎人维度的最后位置
+                        # 因为步骤2已经全局更新过，这里取到的一定是猎物离开该维度前的最新位置
+                        if prey_id in self.prey_last_pos_cache and hunter_dimension in self.prey_last_pos_cache[
+                            prey_id]:
+                            target_pos = self.prey_last_pos_cache[prey_id][hunter_dimension]
+                            is_tracking_last_known = True
+
+                    # === 开始计算方向 ===
+                    if target_pos is not None:
                         hunter_x_pos = self.hunter_pos[0]
                         hunter_y_pos = self.hunter_pos[1]
                         hunter_z_pos = self.hunter_pos[2]
-                        prey_x_pos = self.prey_pos[0]
-                        prey_y_pos = self.prey_pos[1]
-                        prey_z_pos = self.prey_pos[2]
+
+                        prey_x_pos = target_pos[0]
+                        prey_y_pos = target_pos[1]
+                        prey_z_pos = target_pos[2]
 
                         hunter_rot_comp = compFactory.CreateRot(hunter_id)
                         [hunter_v_rot, hunter_h_rot] = hunter_rot_comp.GetRot()
+
                         if self.hunter_ids[hunter_id]["is_in_boat"] == 1:
                             body_rot = self.hunter_ids[hunter_id]["body_rot"]
                             if body_rot + 180 > 360:
@@ -406,19 +448,17 @@ class PlayerCompassServerSystem(ServerSystem):
                             elif body_rot + 180 < 0:
                                 yushu = -((-(body_rot + 180)) % 360)
                                 body_rot = 180 + yushu
-                            else:
-                                pass
                             hunter_h_rot = body_rot
-                        # print(hunter_h_rot)
 
                         hp_x_pos = hunter_x_pos - prey_x_pos
                         hp_y_pos = hunter_y_pos - prey_y_pos
                         hp_z_pos = hunter_z_pos - prey_z_pos
 
-                        hp_distance = ( hp_x_pos ** 2 + hp_y_pos ** 2 + hp_z_pos ** 2 ) ** 0.5
+                        hp_distance = (hp_x_pos ** 2 + hp_y_pos ** 2 + hp_z_pos ** 2) ** 0.5
 
                         if (hunter_x_pos - prey_x_pos) == 0:
                             hp_x_pos = 1.0
+
                         prey_angle = math.atan(hp_z_pos / hp_x_pos)
                         prey_angle = prey_angle * 180 / math.pi
                         if hp_x_pos > 0:
@@ -434,43 +474,35 @@ class PlayerCompassServerSystem(ServerSystem):
 
                         hp_angle = hunter_h_rot - prey_angle
 
-                        direction_data = self.CreateEventData()
-                        direction_data['id'] = hunter_id
-                        # ------------------------------------
-
-                        # hunter_comp = compFactory.CreateCommand(hunter_id)
-                        # if -hp_y_pos > 0:
-                        #     command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\"§6§l垂直距离: ︽ " + str(
-                        #         round(-hp_y_pos, 1)) + "\"}]}"
-                        # elif round(hp_y_pos) == 0:
-                        #     command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\"§6§l垂直距离: == " + str(
-                        #         round(hp_y_pos, 1)) + "\"}]}"
-                        # else:
-                        #     command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\"§6§l垂直距离: ︾ " + str(
-                        #         round(hp_y_pos, 1)) + "\"}]}"
-                        # hunter_comp.SetCommand(command, hunter_id)
-
-
+                        # === Action Bar 显示 ===
                         if self.enable_coordinate_display + self.enable_distance_display != 0:
                             hunter_comp = compFactory.CreateCommand(hunter_id)
-
                             command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\""
 
+                            # 如果是残影，显示灰色且带标记
+                            status_prefix = "§6§l" if not is_tracking_last_known else "§7§l[残影] "
+
                             if self.enable_coordinate_display == 1:
-                                command = command + "§6§l猎物坐标:  " + str(int(round(prey_x_pos, 0))) + " " + str(int(round(prey_y_pos, 0))) + " " + str(int(round(prey_z_pos, 0))) + "\n"
+                                command += status_prefix + "坐标: " + str(int(round(prey_x_pos, 0))) + " " + str(
+                                    int(round(prey_y_pos, 0))) + " " + str(int(round(prey_z_pos, 0))) + "\n"
+
                             if self.enable_distance_display == 1:
+                                dist_text = ""
                                 if -hp_y_pos > 0:
-                                    command = command + "§6§l猎物距离: ︽ " + str(int(round(hp_distance, 0)))
+                                    dist_text = "距离: ︽ "
                                 elif round(hp_y_pos) == 0:
-                                    command = command + "§6§l猎物距离: == " + str(int(round(hp_distance, 0)))
+                                    dist_text = "距离: == "
                                 else:
-                                    command = command + "§6§l猎物距离: ︾ " + str(int(round(hp_distance, 0)))
+                                    dist_text = "距离: ︾ "
+                                command += status_prefix + dist_text + str(int(round(hp_distance, 0)))
 
-                            command = command + "\"}]}"
-
+                            command += "\"}]}"
                             hunter_comp.SetCommand(command, hunter_id)
 
-                        # -------------------------------------
+                        # === 指南针纹理 ===
+                        direction_data = self.CreateEventData()
+                        direction_data['id'] = hunter_id
+
                         if hp_angle < start_angle or hp_angle > end_angle:
                             direction_data['direction'] = 0
                         elif start_angle + portion < hp_angle < start_angle + portion * 27:
@@ -481,27 +513,25 @@ class PlayerCompassServerSystem(ServerSystem):
                         if value["is_active"] == 1:
                             self.NotifyToClient(hunter_id, 'ChangeCompassTexture', direction_data)
 
-                        # 通过层叠图像实现指南针(半失败)
-                        # comp = serverApi.GetEngineCompFactory().CreateItem(hunter_id)
-                        # item_dict = comp.GetPlayerItem(serverApi.GetMinecraftEnum().ItemPosType.INVENTORY, 0)
-                        # key = "hunter_player_compass:hunter_player_compass_%d" % direction_data['direction']
-                        # comp.SetItemLayer(item_dict, 1, key)
-                        # comp.SpawnItemToPlayerInv(item_dict, hunter_id, 0)
-
                     else:
+                        # 无法追踪（不同维度且无历史记录）
                         prey_name_comp = serverApi.GetEngineCompFactory().CreateName(prey_id)
                         prey_name = prey_name_comp.GetName()
 
                         hunter_comp = compFactory.CreateCommand(hunter_id)
-                        command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\"§6§l与 " + prey_name + " 的维度不同，无法使用猎人指南针\"}]}"
+                        command = "/titleraw @s actionbar {\"rawtext\": [{\"text\":\"§c§l" + prey_name + " 不在当前维度，且无残留踪迹\"}]}"
                         hunter_comp.SetCommand(command, hunter_id)
 
-                elif self.hunter_ids[str(hunter_id)]["target"] == 0:
-                    direction_data = self.CreateEventData()
-                    direction_data['id'] = hunter_id
-                    direction_data['direction'] = -1
-                    self.NotifyToClient(hunter_id, 'ChangeCompassTexture', direction_data)
+                        if value["is_active"] == 1:
+                            direction_data = self.CreateEventData()
+                            direction_data['id'] = hunter_id
+                            direction_data['direction'] = 0
+                            self.NotifyToClient(hunter_id, 'ChangeCompassTexture', direction_data)
 
+                elif self.hunter_ids[str(hunter_id)]["target"] == 0:
+                    player_ui_data['id'] = hunter_id
+                    player_ui_data['direction'] = -1
+                    self.NotifyToClient(hunter_id, 'ChangeCompassTexture', player_ui_data)
                 else:
                     self.hunter_ids[str(hunter_id)]["target"] = 0
 
