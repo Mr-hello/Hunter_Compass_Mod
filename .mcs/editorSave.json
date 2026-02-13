@@ -1,4 +1,26 @@
 {
+    "Addon": {
+        "EnchantSetting": {
+            "amplifier": 1
+        },
+        "PackResourceSortData": {
+            "2_hunter_player_compass:hunter_player_compass": {
+                "createTime": 1770957065.825388,
+                "modifyTime": 1770957065.825388
+            },
+            "8_vjxid:hunter_player_compass_recipe": {
+                "createTime": 1770957065.825388,
+                "modifyTime": 1770957065.825388
+            }
+        },
+        "PlayerEffectSetting": {
+            "amplifier": 1,
+            "duration": 10
+        },
+        "PresetInstanceTreeData": [
+
+        ]
+    },
     "UI": {
         "customPrefabGroupExpand": [
 
@@ -11,7 +33,6 @@
                 "D:\\MCStudioDownload\\work\\wy3342551532@163.com\\Cpp\\AddOn\\ac7a16077c3945eb9ce9dc32b7c592f8\\resource_pack_Xl7hqDtX\\ui\\hunter_player_compass_ui.json": [
                     "/main",
                     "/main/menu_panel",
-                    "/main/menu_panel/messagebox_panel",
                     "/main/menu_panel/messagebox_panel/button_panel"
                 ]
             }

@@ -49,8 +49,8 @@ class HunterPlayerCompassScreen(ScreenNode):
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(1)", self.OnJoinHunterButtonTouch, {"isSwallow": True})
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(2)", self.OnJoinPreyButtonTouch, {"isSwallow": True})
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(5)", self.OnCleanListButtonTouch, {"isSwallow": True})
-        self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(3)", self.OnActivateButtonTouch, {"isSwallow": True})
-        self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(4)", self.OnStopButtonTouch, {"isSwallow": True})
+        self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(3)", self.OnSwitchCompassButtonTouch, {"isSwallow": True})
+        self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(4)", self.OnLockOrUnlockButtonTouch, {"isSwallow": True})
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(6)", self.OnMyWordsButtonTouch, {"isSwallow": True})
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(7)", self.OnActivateButtonTouch, {"isSwallow": True})
         self.AddTouchEventHandler("/menu_panel/messagebox_panel/button_panel/button(8)", self.OnSettingButtonTouch, {"isSwallow": True})
@@ -333,7 +333,7 @@ class HunterPlayerCompassScreen(ScreenNode):
         # 按钮事件
         touchEvent = args["TouchEvent"]
         if touchEvent == touchEventEnum.TouchUp:
-            print("(3)")
+            print("(7)")
             player_id = clientApi.GetLocalPlayerId()
             player_name_comp = clientApi.GetEngineCompFactory().CreateName(player_id)
             player_name = player_name_comp.GetName()
@@ -341,7 +341,7 @@ class HunterPlayerCompassScreen(ScreenNode):
             clientSystem = clientApi.GetSystem("hunter_player_compass_mod", "PlayerCompassClientSystem")
             clientSystem.NotifyToServer("OnActivateButtonTouch", data)
 
-    def OnStopButtonTouch(self, args):
+    def OnLockOrUnlockButtonTouch(self, args):
         touchEventEnum = clientApi.GetMinecraftEnum().TouchEvent
         # 按钮事件
         touchEvent = args["TouchEvent"]
@@ -352,7 +352,19 @@ class HunterPlayerCompassScreen(ScreenNode):
             player_name = player_name_comp.GetName()
             data = {"player_id": player_id, "player_name": player_name, "message": "stop"}
             clientSystem = clientApi.GetSystem("hunter_player_compass_mod", "PlayerCompassClientSystem")
-            clientSystem.NotifyToServer("OnStopButtonTouch", data)
+            clientSystem.NotifyToServer("OnLockOrUnlockButtonTouch", data)
+
+    def OnSwitchCompassButtonTouch(self, args):
+        touchEventEnum = clientApi.GetMinecraftEnum().TouchEvent
+        touchEvent = args["TouchEvent"]
+        if touchEvent == touchEventEnum.TouchUp:
+            print("(3)")
+            player_id = clientApi.GetLocalPlayerId()
+            player_name_comp = clientApi.GetEngineCompFactory().CreateName(player_id)
+            player_name = player_name_comp.GetName()
+            data = {"player_id": player_id, "player_name": player_name, "message": "switch"}
+            clientSystem = clientApi.GetSystem("hunter_player_compass_mod", "PlayerCompassClientSystem")
+            clientSystem.NotifyToServer("OnSwitchCompassButtonTouch", data)
 
     def OnMyWordsButtonTouch(self, args):
         touchEventEnum = clientApi.GetMinecraftEnum().TouchEvent

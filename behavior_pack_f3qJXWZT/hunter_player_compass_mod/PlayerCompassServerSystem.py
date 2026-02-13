@@ -46,7 +46,9 @@ class PlayerCompassServerSystem(ServerSystem):
         self.ListenForEvent("hunter_player_compass_mod", "PlayerCompassClientSystem",
                             "OnActivateButtonTouch", self, self.compass_using_server_event_touch_button)
         self.ListenForEvent("hunter_player_compass_mod", "PlayerCompassClientSystem",
-                            "OnStopButtonTouch", self, self.compass_using_server_event_touch_button)
+                            "OnSwitchCompassButtonTouch", self, self.compass_using_server_event_touch_button)
+        self.ListenForEvent("hunter_player_compass_mod", "PlayerCompassClientSystem",
+                            "OnLockOrUnlockButtonTouch", self, self.lock_or_unlock_identity)
         self.ListenForEvent("hunter_player_compass_mod", "PlayerCompassClientSystem",
                             "OnMyWordsButtonTouch", self, self.notify_players)
         self.ListenForEvent("hunter_player_compass_mod", "PlayerCompassClientSystem",
@@ -328,6 +330,11 @@ class PlayerCompassServerSystem(ServerSystem):
         # 换人
         elif player_id in hunter_id_values:
 
+            if "is_active" not in self.hunter_ids[str(player_id)]:
+                self.hunter_ids[str(player_id)]["is_active"] = 0
+            if "target" not in self.hunter_ids[str(player_id)]:
+                self.hunter_ids[str(player_id)]["target"] = 0
+
             prey_sum = len(self.prey_ids)
 
             if message == "activate or change":
@@ -350,6 +357,23 @@ class PlayerCompassServerSystem(ServerSystem):
                 msg = "系统：已停用猎人指南针"
                 msg_comp.NotifyOneMessage(player_id, msg)
 
+            elif message == "switch":
+                if self.hunter_ids[str(player_id)]["is_active"] == 1:
+                    self.hunter_ids[str(player_id)]["is_active"] = 0
+                    self.hunter_ids[str(player_id)]["target"] = 0
+                    msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
+                    msg = "系统：已停用猎人指南针"
+                    msg_comp.NotifyOneMessage(player_id, msg)
+                else:
+                    self.hunter_ids[str(player_id)]["is_active"] = 1
+                    self.hunter_ids[str(player_id)]["target"] = 1
+                    prey_id = self.prey_ids[self.hunter_ids[str(player_id)]["target"] - 1]
+                    prey_name_comp = serverApi.GetEngineCompFactory().CreateName(prey_id)
+                    prey_name = prey_name_comp.GetName()
+                    msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
+                    msg = "系统：已启用猎人指南针,指向目标 " + prey_name
+                    msg_comp.NotifyOneMessage(player_id, msg)
+
         else:
             msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
             msg = "系统：你不是猎人，无法使用猎人指南针"
@@ -357,6 +381,9 @@ class PlayerCompassServerSystem(ServerSystem):
 
         print(self.hunter_ids)
         print(self.prey_ids)
+
+    def lock_or_unlock_identity(self):
+        pass
 
     def on_script_tick(self):
         # 1. 初始化缓存字典

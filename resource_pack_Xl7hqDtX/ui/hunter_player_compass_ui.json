@@ -658,7 +658,7 @@
                                                             0,
                                                             0
                                                         ],
-                                                        "$label_text": "开启指南针",
+                                                        "$label_text": "开关指南针",
                                                         "$nine_slice_buttom": 0,
                                                         "$nine_slice_left": 0,
                                                         "$nine_slice_right": 0,
@@ -728,7 +728,7 @@
                                                             0,
                                                             0
                                                         ],
-                                                        "$label_text": "关闭指南针",
+                                                        "$label_text": "锁定/解锁身份",
                                                         "$nine_slice_buttom": 0,
                                                         "$nine_slice_left": 0,
                                                         "$nine_slice_right": 0,
