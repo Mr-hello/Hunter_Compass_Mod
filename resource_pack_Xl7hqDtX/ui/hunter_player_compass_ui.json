@@ -728,7 +728,7 @@
                                                             0,
                                                             0
                                                         ],
-                                                        "$label_text": "锁定/解锁身份",
+                                                        "$label_text": "锁定/解锁身份\n（管理员）",
                                                         "$nine_slice_buttom": 0,
                                                         "$nine_slice_left": 0,
                                                         "$nine_slice_right": 0,
@@ -798,7 +798,7 @@
                                                             0,
                                                             0
                                                         ],
-                                                        "$label_text": "清空猎人和猎物\n(需要管理员权限)",
+                                                        "$label_text": "清空猎人和猎物\n(管理员)",
                                                         "$nine_slice_buttom": 0,
                                                         "$nine_slice_left": 0,
                                                         "$nine_slice_right": 0,

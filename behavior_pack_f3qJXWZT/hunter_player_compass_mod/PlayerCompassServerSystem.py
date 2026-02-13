@@ -24,6 +24,7 @@ class PlayerCompassServerSystem(ServerSystem):
         self.enable_distance_display = 1
         self.enable_keep_compass = 1
         self.enable_menu_button = 1
+        self.is_identity_locked = 0
         self.levelid = ""
         self.ListenEvent()
 
@@ -85,7 +86,8 @@ class PlayerCompassServerSystem(ServerSystem):
         setting_data_dict = {"enable_keep_compass": self.enable_keep_compass,
                              "enable_coordinate_display": self.enable_coordinate_display,
                              "enable_distance_display": self.enable_distance_display,
-                             "enable_menu_button": self.enable_menu_button}
+                             "enable_menu_button": self.enable_menu_button,
+                             "is_identity_locked": self.is_identity_locked,}
         print("准备向客户端发送设置数据")
         self.NotifyToClient(player_id, 'ReceiveSettingData', setting_data_dict)
         print("已完成向客户端发送设置数据")
@@ -202,6 +204,28 @@ class PlayerCompassServerSystem(ServerSystem):
             print("准备向客户端发送请求(权限不足)")
             self.NotifyToClient(player_id, 'EnableMenuButton', enable_menu_button_dict)
             print("已完成向客户端发送请求(权限不足)")
+
+    def lock_or_unlock_identity(self, data):
+        player_id = data["player_id"]
+        operation_comp = serverApi.GetEngineCompFactory().CreatePlayer(player_id)
+        operation = operation_comp.GetPlayerOperation()
+        if operation >= 2:
+            if self.is_identity_locked == 1:
+                self.is_identity_locked = 0
+            else:
+                self.is_identity_locked = 1
+            if self.is_identity_locked == 1:
+                msg = "系统：已锁定身份"
+            else:
+                msg = "系统：已解锁身份"
+            player_id_list = serverApi.GetPlayerList()
+            for player_id in player_id_list:
+                msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
+                msg_comp.NotifyOneMessage(player_id, msg)
+        else:
+            msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
+            msg = "系统： 权限不足"
+            msg_comp.NotifyOneMessage(player_id, msg)
 
     def notify_players(self, data):
         # 获取玩家ID
@@ -381,9 +405,6 @@ class PlayerCompassServerSystem(ServerSystem):
 
         print(self.hunter_ids)
         print(self.prey_ids)
-
-    def lock_or_unlock_identity(self):
-        pass
 
     def on_script_tick(self):
         # 1. 初始化缓存字典
@@ -716,6 +737,12 @@ class PlayerCompassServerSystem(ServerSystem):
         # 获取聊天消息
         message = data['message']
         print("touch_button")
+
+        if self.is_identity_locked == 1:
+            msg_comp = serverApi.GetEngineCompFactory().CreateMsg(player_id)
+            msg = "系统： 身份已锁定，无法更改"
+            msg_comp.NotifyOneMessage(player_id, msg)
+            return
 
         hunter_id_values = list(self.hunter_ids.keys())
 
