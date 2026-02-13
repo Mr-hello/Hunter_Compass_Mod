@@ -40,6 +40,7 @@ class HunterPlayerCompassScreen(ScreenNode):
         self.sy_sliderRealValue = 1
         self.sliderValue = 0
         self.settingbox_panel_display = 0
+        self.compass_menu_display = 0
         self.image_panel_path = "/menu_panel/image_panel"
         self.slider_panel_path = "/menu_panel/settingbox_panel"
 
@@ -117,8 +118,17 @@ class HunterPlayerCompassScreen(ScreenNode):
         pass
 
     def OpenCompassMenuTouch(self, args):
-        if self.settingbox_panel_display == 0:
-            self.SetVisible(self.messagebox_panel_path, True)
+        touchEventEnum = clientApi.GetMinecraftEnum().TouchEvent
+        # 按钮事件
+        touchEvent = args["TouchEvent"]
+        if touchEvent == touchEventEnum.TouchUp:
+            if self.settingbox_panel_display == 0:
+                if self.compass_menu_display == 0:
+                    self.compass_menu_display = 1
+                    self.SetVisible(self.messagebox_panel_path, True)
+                else:
+                    self.compass_menu_display = 0
+                    self.SetVisible(self.messagebox_panel_path, False, False)
             # messagebox_panel_input_panel = self.GetBaseUIControl(self.messagebox_panel_path).asInputPanel()
             # print(str(messagebox_panel_input_panel) + "123654")
             # ret1 = messagebox_panel_input_panel.SetIsSwallow(True)
